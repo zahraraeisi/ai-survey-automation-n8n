@@ -1,0 +1,170 @@
+{
+  "name": "Survey form",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Survey form",
+        "formDescription": "Survey on artificial intelligence training",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "what is your name?",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Were you satisfied with the educational situation?",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Yes"
+                  },
+                  {
+                    "option": "No"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "What suggestions do you have to improve this training?"
+            },
+            {
+              "fieldLabel": "Enter your age."
+            },
+            {
+              "fieldLabel": "Enter your email.",
+              "fieldType": "email",
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -464,
+        -80
+      ],
+      "id": "24fe2a7e-928c-4b99-9879-f6411fc33419",
+      "name": "On form submission",
+      "webhookId": "7e600e2b-6319-4c61-bb37-70e47754f2b1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI assistant.\n\nYou will receive the following inputs:\n\n1) User Name:\n{{ $json['what is your name?'] }}\n\n2) Satisfaction Answer:\n{{ $json['Were you satisfied with the educational situation?'] }}\n\n3) User Suggestion:\n{{ $json['What suggestions do you have to improve this training?'] }}\n\nInstructions:\n\n- The Satisfaction Answer can be \"yes\" or \"no\".\n- Treat the answer as case-insensitive (yes / Yes / YES / no / No / NO).\n\nYour task:\n\nBased on the inputs above, generate a professional and friendly message.\n\nMessage Rules:\n\n1) Always start with:\nHello {User Name} 👋\nWelcome!\n\n2) If Satisfaction Answer is \"yes\":\n- Thank the user for their positive feedback.\n- Confirm their response has been recorded.\n- Mention their suggestion and state that it will be reviewed carefully to improve the training.\n\n3) If Satisfaction Answer is \"no\":\n- Thank the user for their honest feedback.\n- Acknowledge that their experience was not fully satisfactory.\n- Mention their suggestion and state that it will be reviewed carefully to improve the training.\n\n4) If User Suggestion is empty or missing:\n- Do not mention suggestions in the message.\n\nImportant:\n- Only return the final message text.\n- Do not explain your reasoning.\n- Do not repeat the inputs.\n- Keep the tone professional, respectful, and friendly.\n- Keep the message clear and concise.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -288,
+        -96
+      ],
+      "id": "1955d940-13cd-4211-a029-260e802c9cc2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "gpt-4o"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -304,
+        112
+      ],
+      "id": "2383cfc8-7bdd-4334-8224-0e1fe062d530",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "vUpSJWeQjqnR1bWv",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json['Enter your email.'] }}",
+        "subject": "Feedback survey form",
+        "message": "={{ $json.output }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        -96
+      ],
+      "id": "55c48b30-a377-456c-b59d-4c915e05a398",
+      "name": "Send a message",
+      "webhookId": "7aa1b406-d397-4911-821e-a2f250705acf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OPp4gcMdUtQLvOGl",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "2770ef93-27fe-4752-860a-c5206a49ed43",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "77f6e1f76a4d08b012b359b0836533571ec1befbfbf659136914a33362f7b605"
+  },
+  "id": "4WHKQvF33j3x7P8k",
+  "tags": []
+}
